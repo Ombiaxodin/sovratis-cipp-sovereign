@@ -207,7 +207,10 @@ const Page = ({ reason = 'session' }) => {
   return (
     <>
       <Head>
-        <title>{isSessionEnded ? 'Sign in - CIPP' : '401 - Access Denied'}</title>
+        {/* [SOVRATIS OVERRIDE START] */}
+        {/* upstream: <title>{isSessionEnded ? 'Sign in - CIPP' : '401 - Access Denied'}</title> */}
+        <title>{isSessionEnded ? 'Sign in - Sovratis' : '401 - Access Denied'}</title>
+        {/* [SOVRATIS OVERRIDE END] */}
       </Head>
       {/* If an impersonated role can't load /me, this page is what renders — the exit
           affordance must exist here or the user is stuck until they clear localStorage. */}

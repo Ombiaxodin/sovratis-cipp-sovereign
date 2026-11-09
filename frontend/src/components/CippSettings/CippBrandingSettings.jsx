@@ -332,7 +332,10 @@ const CippBrandingSettings = () => {
   const formControl = useForm({
     mode: "onChange",
     defaultValues: {
-      colour: branding.colour || "#F77F00",
+      // [SOVRATIS OVERRIDE START]
+      // upstream: colour: branding.colour || "#F77F00",
+      colour: branding.colour || "#0B3D3A",
+      // [SOVRATIS OVERRIDE END]
       secondaryColour: branding.secondaryColour || "",
       footerText: branding.footerText || "",
       coverFooterText: branding.coverFooterText || "",
@@ -350,7 +353,10 @@ const CippBrandingSettings = () => {
   // Everything the sync effect and Reset need to put back on the form, in one place — the two
   // paths drifting apart is how a field ends up saving but not reloading.
   const reportChromeValues = (source) => ({
-    colour: source.colour || "#F77F00",
+    // [SOVRATIS OVERRIDE START]
+    // upstream: colour: source.colour || "#F77F00",
+    colour: source.colour || "#0B3D3A",
+    // [SOVRATIS OVERRIDE END]
     secondaryColour: source.secondaryColour || "",
     footerText: source.footerText || "",
     coverFooterText: source.coverFooterText || "",
@@ -456,7 +462,10 @@ const CippBrandingSettings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync when server branding payload changes
   }, [activePresetId, uploadPending, brandingQuery.isSuccess, brandingQuery.dataUpdatedAt]);
 
-  const brandColour = formControl.watch("colour") || "#F77F00";
+  // [SOVRATIS OVERRIDE START]
+  // upstream: const brandColour = formControl.watch("colour") || "#F77F00";
+  const brandColour = formControl.watch("colour") || "#0B3D3A";
+  // [SOVRATIS OVERRIDE END]
   const previewReportTypeValue = formControl.watch("previewReportType");
   const previewReportType =
     previewReportTypeValue?.value || previewReportTypeValue || reportTypeOptions[0]?.value;

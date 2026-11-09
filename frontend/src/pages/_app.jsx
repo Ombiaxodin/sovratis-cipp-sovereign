@@ -197,7 +197,10 @@ const App = (props) => {
   return (
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>CIPP</title>
+        {/* [SOVRATIS OVERRIDE START] */}
+        {/* upstream: <title>CIPP</title> */}
+        <title>Sovratis Sovereign Cloud Manager</title>
+        {/* [SOVRATIS OVERRIDE END] */}
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover" />
       </Head>
       <ReduxProvider store={store}>
@@ -208,7 +211,10 @@ const App = (props) => {
                 {(settings) => {
                   // Create theme even while initializing to avoid blank screen
                   const theme = createTheme({
-                    colorPreset: 'orange',
+                    // [SOVRATIS OVERRIDE START]
+                    // upstream: colorPreset: 'orange',  (primary = Sovratis Petrol; Amber is the secondary/accent slot)
+                    colorPreset: 'blue',
+                    // [SOVRATIS OVERRIDE END]
                     direction: settings.direction || 'ltr',
                     paletteMode:
                       settings.currentTheme?.value !== 'browser'

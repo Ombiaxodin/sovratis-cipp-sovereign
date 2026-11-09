@@ -1,6 +1,9 @@
 import { common } from '@mui/material/colors';
 import { alpha } from '@mui/material/styles';
 import { error, info, neutral, success, warning } from '../colors';
+// [SOVRATIS OVERRIDE START]
+import { orange } from '../colors';
+// [SOVRATIS OVERRIDE END]
 import { getPrimary } from '../utils';
 
 export const createPalette = (config) => {
@@ -26,7 +29,12 @@ export const createPalette = (config) => {
     info,
     mode: 'dark',
     neutral,
-    primary: getPrimary(colorPreset),
+    // [SOVRATIS OVERRIDE START]
+    // Petrol (#0B3D3A) on the dark background (#0A0F18) is about 1.6:1, so primary and accent are both Amber in dark mode
+    // upstream: primary: getPrimary(colorPreset),
+    primary: orange,
+    secondary: orange,
+    // [SOVRATIS OVERRIDE END]
     success,
     text: {
       primary: common.white,

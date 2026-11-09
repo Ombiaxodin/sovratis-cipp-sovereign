@@ -25,16 +25,22 @@ export const neutral = {
 };
 
 export const blue = withAlphas({
-  light: "#003049",
-  main: "#003049",
-  dark: "#003049",
+  // [SOVRATIS OVERRIDE START]
+  // upstream: CIPP navy #003049. Sovratis Petrol.
+  light: "#0B3D3A",
+  main: "#0B3D3A",
+  dark: "#0B3D3A",
+  // [SOVRATIS OVERRIDE END]
   contrastText: "#FFFFFF",
 });
 
 export const orange = withAlphas({
-  light: "#F77F00",
-  main: "#F77F00",
-  dark: "#F77F00",
+  // [SOVRATIS OVERRIDE START]
+  // upstream: CIPP orange #F77F00. Sovratis Amber.
+  light: "#C97A2B",
+  main: "#C97A2B",
+  dark: "#C97A2B",
+  // [SOVRATIS OVERRIDE END]
   contrastText: "#FFFFFF",
 });
 

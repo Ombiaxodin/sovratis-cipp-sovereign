@@ -114,6 +114,9 @@ export const CippTenantTable = ({
       "displayName",
       "defaultDomainName",
       "delegatedPrivilegeStatus",
+      // [SOVRATIS OVERRIDE START]
+      "CloudEnvironment",
+      // [SOVRATIS OVERRIDE END]
       "Excluded",
       "ExcludeDate",
       "ExcludeUser",
@@ -126,6 +129,9 @@ export const CippTenantTable = ({
     "displayName", // Tenant Name
     "defaultDomainName", // Default Domain
     "delegatedPrivilegeStatus", // Delegated Privilege Status
+    // [SOVRATIS OVERRIDE START]
+    "CloudEnvironment", // Cloud Environment (Global / DELOS)
+    // [SOVRATIS OVERRIDE END]
     "Excluded", // Excluded Status
     "ExcludeDate", // Exclude Date
     "ExcludeUser", // Exclude User

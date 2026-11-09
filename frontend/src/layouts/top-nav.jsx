@@ -290,7 +290,10 @@ export const TopNav = (props) => {
               sx={{
                 display: 'inline-flex',
                 height: 24,
-                width: 24,
+                // [SOVRATIS OVERRIDE START]
+                // upstream: width: 24,  (square slot; the wordmark is wider than tall)
+                width: 'auto',
+                // [SOVRATIS OVERRIDE END]
               }}
             >
               <Logo />

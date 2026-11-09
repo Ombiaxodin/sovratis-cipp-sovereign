@@ -105,7 +105,10 @@ export const CippBreadcrumbNav = ({ withRail = false } = {}) => {
         return
       }
 
-      let pageTitle = document.title.replace(' - CIPP', '').trim()
+      // [SOVRATIS OVERRIDE START]
+      // upstream: let pageTitle = document.title.replace(' - CIPP', '').trim()
+      let pageTitle = document.title.replace(' - CIPP', '').replace(' - Sovratis', '').trim()
+      // [SOVRATIS OVERRIDE END]
 
       // Remove tenant domain from title (e.g., "Groups - domain.onmicrosoft.com" -> "Groups")
       // But only if it looks like a domain (contains a dot)
@@ -266,7 +269,10 @@ export const CippBreadcrumbNav = ({ withRail = false } = {}) => {
           return
         }
 
-        let pageTitle = document.title.replace(' - CIPP', '').trim()
+        // [SOVRATIS OVERRIDE START]
+        // upstream: let pageTitle = document.title.replace(' - CIPP', '').trim()
+        let pageTitle = document.title.replace(' - CIPP', '').replace(' - Sovratis', '').trim()
+        // [SOVRATIS OVERRIDE END]
         const parts = pageTitle.split(' - ')
         const cleanTitle =
           parts.length > 1 && parts[parts.length - 1].includes('.')
@@ -466,7 +472,10 @@ export const CippBreadcrumbNav = ({ withRail = false } = {}) => {
       const lastItem = result[result.length - 1]
       if (lastItem.path && lastItem.path !== currentPath && currentPath.startsWith(lastItem.path)) {
         // Use the tracked page title if available, otherwise fall back to document.title
-        let tabTitle = currentPageTitle || document.title.replace(' - CIPP', '').trim()
+        // [SOVRATIS OVERRIDE START]
+        // upstream: let tabTitle = currentPageTitle || document.title.replace(' - CIPP', '').trim()
+        let tabTitle = currentPageTitle || document.title.replace(' - CIPP', '').replace(' - Sovratis', '').trim()
+        // [SOVRATIS OVERRIDE END]
 
         // Clean AllTenants from title
         tabTitle = cleanPageTitle(tabTitle)

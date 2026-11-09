@@ -24,14 +24,19 @@ const fullHeight = {
 // public/logo.png carries its own white keyline, so it reads on the navy panel
 // untouched — no mask, no plate, no light/dark variant. Do not swap this for
 // src/components/logo.js: that file throws if its inlined payload is altered.
+// [SOVRATIS OVERRIDE START]
+// upstream: <Box component="img" src="/logo.png" alt="CIPP" sx={{ display: 'block', width: 'auto', height: { xs: 46, md: 96 } }} />
+// The panel is always dark, so it always gets the dark-background banner lockup (245x36) rather than the oversized
+// logo.png. Sized by width because the wordmark is about 6.8:1.
 const CippBrandLockup = () => (
   <Box
     component="img"
-    src="/logo.png"
-    alt="CIPP"
-    sx={{ display: 'block', width: 'auto', height: { xs: 46, md: 96 } }}
+    src="/banner-logo_245x36.png"
+    alt="Sovratis"
+    sx={{ display: 'block', height: 'auto', width: { xs: 220, md: 300 }, maxWidth: '100%' }}
   />
 )
+// [SOVRATIS OVERRIDE END]
 
 // public/cippy-auth.png is the source artwork with its flat background flood-filled away
 // from the corners — the mug body, the eyes and the little icon interiors are all
@@ -84,7 +89,10 @@ export const CippAuthShell = ({
   onSecondaryClick,
   busy = false,
   children,
-  tagline = 'CyberDrain Improved Partner Portal',
+  // [SOVRATIS OVERRIDE START]
+  // upstream: tagline = 'CyberDrain Improved Partner Portal',
+  tagline = 'Sovratis Sovereign Cloud Manager',
+  // [SOVRATIS OVERRIDE END]
 }) => {
   // href wins over onClick so a caller passing both gets one control, not two
   const hasPrimary = Boolean(actionText) && Boolean(actionHref || onActionClick)

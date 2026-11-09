@@ -48,7 +48,10 @@
 
 .cipp-tutorial-popover .driver-popover-next-btn,
 .cipp-tutorial-popover .driver-popover-close-btn {
-  background-color: #f77f00;
+  /* [SOVRATIS OVERRIDE START] */
+  /* upstream: background-color: #f77f00; */
+  background-color: #c97a2b; /* Sovratis Amber */
+  /* [SOVRATIS OVERRIDE END] */
   color: #fff;
   border: none;
 }

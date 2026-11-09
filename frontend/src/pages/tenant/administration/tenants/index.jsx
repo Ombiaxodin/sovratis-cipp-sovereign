@@ -10,6 +10,9 @@ const Page = () => {
   const simpleColumns = [
     "displayName",
     "defaultDomainName",
+    // [SOVRATIS OVERRIDE START]
+    "CloudEnvironment",
+    // [SOVRATIS OVERRIDE END]
     "tenantGroups",
     "portal_m365",
     "portal_exchange",
@@ -57,6 +60,9 @@ const Page = () => {
       apiData={{
         Mode: "TenantList",
         tenantFilter: null,
+        // [SOVRATIS OVERRIDE START]
+        IncludeCloudEnvironment: true,
+        // [SOVRATIS OVERRIDE END]
       }}
       actions={actions}
     />

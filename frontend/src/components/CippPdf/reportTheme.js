@@ -10,7 +10,10 @@
 // derived from both, and the footer/watermark configuration. Reports consume the theme; nothing
 // downstream needs to know how branding is stored.
 
-export const DEFAULT_BRAND_COLOUR = '#F77F00'
+// [SOVRATIS OVERRIDE START]
+// upstream: export const DEFAULT_BRAND_COLOUR = '#F77F00'
+export const DEFAULT_BRAND_COLOUR = '#0B3D3A' // Sovratis Petrol (white text on it is about 11.8:1)
+// [SOVRATIS OVERRIDE END]
 
 // Status colours, matching the severity language used across the reports. These are deliberately
 // NOT brand-derived: green-is-good/red-is-bad has to survive whatever colours an MSP picks.

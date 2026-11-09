@@ -117,6 +117,9 @@ const Page = () => {
       "displayName",
       "defaultDomainName",
       "delegatedPrivilegeStatus",
+      // [SOVRATIS OVERRIDE START]
+      "CloudEnvironment",
+      // [SOVRATIS OVERRIDE END]
       "directTenantUserPrincipalName",
       "directTenantAuthDate",
       "Excluded",
@@ -130,6 +133,9 @@ const Page = () => {
     "displayName",
     "defaultDomainName",
     "delegatedPrivilegeStatus",
+    // [SOVRATIS OVERRIDE START]
+    "CloudEnvironment",
+    // [SOVRATIS OVERRIDE END]
     "Excluded",
     "ExcludeDate",
     "ExcludeUser",

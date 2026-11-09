@@ -1,6 +1,9 @@
 import { common } from '@mui/material/colors';
 import { alpha } from '@mui/material/styles';
 import { error, info, neutral, success, warning } from '../colors';
+// [SOVRATIS OVERRIDE START]
+import { orange } from '../colors';
+// [SOVRATIS OVERRIDE END]
 import { getPrimary } from '../utils';
 
 export const createPalette = (config) => {
@@ -25,6 +28,10 @@ export const createPalette = (config) => {
     mode: 'light',
     neutral,
     primary: getPrimary(colorPreset),
+    // [SOVRATIS OVERRIDE START]
+    // Sovratis Amber is the accent / highlight colour
+    secondary: orange,
+    // [SOVRATIS OVERRIDE END]
     success,
     text: {
       primary: neutral[900],

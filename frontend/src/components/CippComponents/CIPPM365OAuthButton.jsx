@@ -18,6 +18,10 @@ export const CIPPM365OAuthButton = ({
   validateServiceAccount = true,
   promptBeforeAuth = false,
   disabled = false,
+  // [SOVRATIS OVERRIDE START]
+  // Cloud environment the sign-in targets ('Global' or a sovereign cloud such as 'DELOS')
+  cloudEnvironment = 'Global',
+  // [SOVRATIS OVERRIDE END]
 }) => {
   const [authInProgress, setAuthInProgress] = useState(false)
   const [authError, setAuthError] = useState(null)
@@ -136,6 +140,21 @@ export const CIPPM365OAuthButton = ({
   const retrieveDeviceCode = async () => {
     setCodeRetrievalInProgress(true)
     setAuthError(null)
+
+    // [SOVRATIS OVERRIDE START]
+    // The device code endpoint is bound to the Global cloud; sovereign clouds use the popup flow.
+    if (cloudEnvironment !== 'Global') {
+      const error = {
+        errorCode: 'device_code_unsupported',
+        errorMessage: `Device code sign-in is not available for the ${cloudEnvironment} cloud environment.`,
+        timestamp: new Date().toISOString(),
+      }
+      setAuthError(error)
+      if (onAuthError) onAuthError(error)
+      setCodeRetrievalInProgress(false)
+      return
+    }
+    // [SOVRATIS OVERRIDE END]
 
     // Only refetch appId if not already present
     if (!applicationId && !appIdInfo?.data?.applicationId) {
@@ -365,7 +384,34 @@ export const CIPPM365OAuthButton = ({
     }
 
     // Get the application ID to use
-    const appId = applicationId || appIdInfo?.data?.applicationId
+    // [SOVRATIS OVERRIDE START]
+    // Sovereign clouds sign in against their own authority with their own app registration. Both come from
+    // the backend (ExecListAppId.cloudEnvironments); nothing sovereign is hardcoded in the browser.
+    const sovereignCloud =
+      cloudEnvironment !== 'Global'
+        ? appIdInfo?.data?.cloudEnvironments?.find((c) => c.name === cloudEnvironment)
+        : null
+    if (cloudEnvironment !== 'Global' && !sovereignCloud?.configured) {
+      const envPrefix = cloudEnvironment.charAt(0).toUpperCase() + cloudEnvironment.slice(1).toLowerCase()
+      const error = {
+        errorCode: 'cloud_not_configured',
+        errorMessage: `The ${cloudEnvironment} cloud environment is not configured on this CIPP instance. Set the ${envPrefix}ApplicationId and ${envPrefix}ApplicationSecret environment variables and try again.`,
+        timestamp: new Date().toISOString(),
+      }
+      setAuthError(error)
+      if (onAuthError) onAuthError(error)
+      setAuthInProgress(false)
+      return
+    }
+    const authorityHost = sovereignCloud ? sovereignCloud.authority : 'login.microsoftonline.com'
+    const authScope = sovereignCloud
+      ? scope.replaceAll('graph.microsoft.com', sovereignCloud.graph)
+      : scope
+    // upstream: const appId = applicationId || appIdInfo?.data?.applicationId
+    const appId = sovereignCloud
+      ? sovereignCloud.applicationId
+      : applicationId || appIdInfo?.data?.applicationId
+    // [SOVRATIS OVERRIDE END]
 
     // Generate MSAL-like authentication parameters
     const msalConfig = {
@@ -456,11 +502,17 @@ export const CIPPM365OAuthButton = ({
     // instead of being told up front that the account cannot be used. It also matches the
     // authority the device code flow uses.
     const authUrl =
-      `https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize?` +
+      // [SOVRATIS OVERRIDE START]
+      // upstream: `https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize?` +
+      `https://${authorityHost}/organizations/oauth2/v2.0/authorize?` +
+      // [SOVRATIS OVERRIDE END]
       `client_id=${appId}` +
       `&response_type=code` +
       `&redirect_uri=${encodeURIComponent(window.location.origin)}/authredirect` +
-      `&scope=${encodeURIComponent(scope)}` +
+      // [SOVRATIS OVERRIDE START]
+      // upstream: `&scope=${encodeURIComponent(scope)}` +
+      `&scope=${encodeURIComponent(authScope)}` +
+      // [SOVRATIS OVERRIDE END]
       `&code_challenge=${codeChallenge}` +
       `&code_challenge_method=S256` +
       `&state=${state}` +
@@ -508,7 +560,12 @@ export const CIPPM365OAuthButton = ({
             },
             body: JSON.stringify({
               tokenRequest,
-              tokenUrl: 'https://login.microsoftonline.com/organizations/oauth2/v2.0/token',
+              // [SOVRATIS OVERRIDE START]
+              // upstream: tokenUrl: 'https://login.microsoftonline.com/organizations/oauth2/v2.0/token',
+              tokenUrl: `https://${authorityHost}/organizations/oauth2/v2.0/token`,
+              // the backend derives and pins the endpoint and credentials from this name, not from tokenUrl
+              cloudEnvironment,
+              // [SOVRATIS OVERRIDE END]
               tenantId: appId, // Pass the tenant ID to retrieve the correct client secret
             }),
           })

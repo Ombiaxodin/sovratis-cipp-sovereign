@@ -1,8 +1,14 @@
 import { useEffect } from "react";
 import { Stack, Box, Typography, Link } from "@mui/material";
+// [SOVRATIS OVERRIDE START]
+import { TextField, MenuItem } from "@mui/material";
+// [SOVRATIS OVERRIDE END]
 import { CIPPM365OAuthButton } from "../CippComponents/CIPPM365OAuthButton";
 import { CippApiResults } from "../CippComponents/CippApiResults";
-import { ApiPostCall } from "../../api/ApiCall";
+// [SOVRATIS OVERRIDE START]
+// upstream: import { ApiPostCall } from "../../api/ApiCall";
+import { ApiGetCall, ApiPostCall } from "../../api/ApiCall";
+// [SOVRATIS OVERRIDE END]
 import { CippWizardStepButtons } from "./CippWizardStepButtons";
 
 export const CippDirectTenantDeploy = (props) => {
@@ -13,6 +19,21 @@ export const CippDirectTenantDeploy = (props) => {
   });
 
   const addTenant = ApiPostCall({ urlfromdata: true, relatedQueryKeys: ["tenants-table"] });
+
+  // [SOVRATIS OVERRIDE START]
+  // Cloud environment of the tenant being added. Required, defaults to Global. It is immutable after
+  // onboarding (a tenant that moves clouds must be removed and added again), so it is chosen up front.
+  formControl.register("cloudEnvironment", { required: true });
+  const cloudEnvironment = formControl.watch("cloudEnvironment") ?? "Global";
+  const appIdInfo = ApiGetCall({ url: "/api/ExecListAppId", queryKey: "listAppId", waiting: true });
+  const cloudOptions = appIdInfo?.data?.cloudEnvironments ?? [{ name: "Global", configured: true }];
+
+  useEffect(() => {
+    if (!formControl.getValues("cloudEnvironment")) {
+      formControl.setValue("cloudEnvironment", "Global", { shouldValidate: true });
+    }
+  }, [formControl]);
+  // [SOVRATIS OVERRIDE END]
 
   useEffect(() => {
     if (addTenant.isSuccess) {
@@ -44,15 +65,46 @@ export const CippDirectTenantDeploy = (props) => {
           .
         </Typography>
 
+        {/* [SOVRATIS OVERRIDE START] */}
+        <Box sx={{ mt: 2, mb: 2, maxWidth: 420 }}>
+          <TextField
+            select
+            required
+            fullWidth
+            size="small"
+            label="Cloud Environment"
+            value={cloudEnvironment}
+            onChange={(event) =>
+              formControl.setValue("cloudEnvironment", event.target.value, { shouldValidate: true })
+            }
+            disabled={addTenant.isPending}
+            helperText="The cloud the tenant lives in. This cannot be changed after onboarding; to move a tenant, remove it and add it again."
+          >
+            {cloudOptions.map((cloud) => (
+              <MenuItem key={cloud.name} value={cloud.name} disabled={!cloud.configured}>
+                {cloud.configured ? cloud.name : `${cloud.name} (not configured)`}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Box>
+        {/* [SOVRATIS OVERRIDE END] */}
+
         <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 2, mb: 2 }}>
           <Stack direction="row" spacing={2} sx={{
             alignItems: "center"
           }}>
             <CIPPM365OAuthButton
+              // [SOVRATIS OVERRIDE START]
+              key={cloudEnvironment}
+              cloudEnvironment={cloudEnvironment}
+              // [SOVRATIS OVERRIDE END]
               onAuthSuccess={(tokenData) => {
                 const updatedTokenData = {
                   ...tokenData,
                   tenantMode: "perTenant",
+                  // [SOVRATIS OVERRIDE START]
+                  cloudEnvironment,
+                  // [SOVRATIS OVERRIDE END]
                 };
                 addTenant.mutate({
                   url: "/api/ExecAddTenant",

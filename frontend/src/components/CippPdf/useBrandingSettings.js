@@ -10,7 +10,10 @@ import { DEFAULT_COVER_STOCK } from './resolveCoverImage'
  * CIPP's own colours rather than waiting.
  */
 export const DEFAULT_BRANDING = Object.freeze({
-  colour: '#F77F00',
+  // [SOVRATIS OVERRIDE START]
+  // upstream: colour: '#F77F00',
+  colour: '#0B3D3A', // Sovratis Petrol
+  // [SOVRATIS OVERRIDE END]
   secondaryColour: '',
   logoImageId: null,
   logoImageIds: [],

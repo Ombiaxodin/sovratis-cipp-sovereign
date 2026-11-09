@@ -5,6 +5,9 @@ import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { ApiGetCall } from '../../api/ApiCall'
 import { clearPersistedQueries } from '../../utils/query-persister'
+// [SOVRATIS OVERRIDE START]
+import { Logo } from '../logo'
+// [SOVRATIS OVERRIDE END]
 
 const OnboardingWizardPage = dynamic(() => import('../CippWizard/OnboardingWizardPage.jsx'), {
   ssr: false,
@@ -51,7 +54,13 @@ const SetupGatePage = () => {
           <Stack direction="row" spacing={2} sx={{
             alignItems: "center"
           }}>
-            <Box component="img" src="/logo.png" alt="CIPP" sx={{ display: 'block', height: 40 }} />
+            {/* [SOVRATIS OVERRIDE START] */}
+            {/* upstream: <Box component="img" src="/logo.png" alt="CIPP" sx={{ display: 'block', height: 40 }} /> */}
+            {/* theme-aware: dark text on light, light text on dark (this page follows background.default) */}
+            <Box sx={{ display: 'flex', height: 40 }}>
+              <Logo />
+            </Box>
+            {/* [SOVRATIS OVERRIDE END] */}
             <Typography variant="h4">Welcome to CIPP</Typography>
           </Stack>
           <Alert severity="info">
