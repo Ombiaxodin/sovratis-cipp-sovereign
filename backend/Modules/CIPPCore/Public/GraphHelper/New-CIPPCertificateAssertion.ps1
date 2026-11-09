@@ -28,6 +28,11 @@ function New-CIPPCertificateAssertion {
         [string]$Audience = "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token"
     )
 
+    # [SOVRATIS OVERRIDE START]
+    # the aud claim must be the token endpoint of the tenant's cloud
+    $Audience = Resolve-SovratisUri -Uri $Audience -TenantFilter $TenantId
+    # [SOVRATIS OVERRIDE END]
+
     # get sha256 hash of certificate for the x5t#S256 header
     $sha256 = New-Object System.Security.Cryptography.SHA256CryptoServiceProvider
     $hash = $sha256.ComputeHash($Certificate.RawData)

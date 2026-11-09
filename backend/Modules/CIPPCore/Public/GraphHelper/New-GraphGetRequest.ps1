@@ -53,6 +53,9 @@ function New-GraphGetRequest {
         }
 
         $nextURL = $uri
+        # [SOVRATIS OVERRIDE START]
+        $nextURL = Resolve-SovratisUri -Uri $uri -TenantFilter $tenantid
+        # [SOVRATIS OVERRIDE END]
         if ($extraHeaders) {
             foreach ($key in $extraHeaders.Keys) {
                 $headers[$key] = $extraHeaders[$key]

@@ -17,18 +17,38 @@ function Get-GraphToken {
     )
     if (!$scope) { $scope = 'https://graph.microsoft.com/.default' }
     if (!$tenantid) { $tenantid = $env:TenantID }
+    # [SOVRATIS OVERRIDE START]
+    # Route to the tenant's cloud: the scope carries the resource host (and therefore also keys the token cache),
+    # the token endpoint carries the authority host.
+    $SovratisCloud = Get-SovratisCloudEnvironment -TenantFilter $tenantid
+    $scope = Resolve-SovratisScope -Scope $scope -CloudEnvironment $SovratisCloud
+    # [SOVRATIS OVERRIDE END]
 
     # Certificate-exclusive auth: force the SAM certificate for CIPP's own SAM app tokens (app-only and
     # delegated). Scoped to the SAM app - explicit $AppID/$AppSecret callers use their own credentials.
     if ([System.Environment]::GetEnvironmentVariable('CertificateAuthMode') -and -not $AppID -and -not $AppSecret) {
         $UseCertificate = $true
     }
+    # [SOVRATIS OVERRIDE START]
+    # Sovereign cloud credentials. A Global app registration cannot authenticate against a sovereign identity plane,
+    # so tokens for the tenant's cloud use that cloud's own app (e.g. $env:DelosApplicationId / DelosApplicationSecret).
+    # Callers that pass their own -AppID/-AppSecret keep using those.
+    $SovratisCred = $null
+    if ($SovratisCloud -ne 'Global' -and -not $AppID -and -not $AppSecret) {
+        # The SAM certificate belongs to the Global app and cannot sign for the sovereign app: fail closed.
+        if ($UseCertificate -eq $true) { throw "Certificate authentication is not supported for the '$SovratisCloud' cloud environment." }
+        $SovratisCred = Get-SovratisCloudCredential -CloudEnvironment $SovratisCloud
+    }
+    # [SOVRATIS OVERRIDE END]
 
     $UseSharedTokenCache = ($SkipCache -ne $true) -and ($null -ne ('CIPP.CIPPTokenCache' -as [type]))
 
     # ── Fast path: check shared .NET token cache before any table lookups ──
     if ($UseSharedTokenCache) {
         $CacheClientId = if ($AppID) { [string]$AppID } else { [string]$env:ApplicationID }
+        # [SOVRATIS OVERRIDE START]
+        if ($SovratisCred) { $CacheClientId = [string]$SovratisCred.ApplicationId }
+        # [SOVRATIS OVERRIDE END]
         $GrantType = if ($asApp -eq $true -or ($null -ne $AppID -and $null -ne $AppSecret)) { 'client_credentials' } else { 'refresh_token' }
         if ($UseCertificate -eq $true) { $GrantType = "${GrantType}_certificate" }
         $SharedTokenCacheKey = [CIPP.CIPPTokenCache]::BuildKey([string]$tenantid, [string]$scope, [bool]$asApp, $CacheClientId, $GrantType)
@@ -98,6 +118,10 @@ function Get-GraphToken {
             $env:CIPPCredentialVersion = [string]$AppCache.CredentialVersion
         }
         $refreshToken = $env:RefreshToken
+        # [SOVRATIS OVERRIDE START]
+        # Per-tenant (direct tenant) refresh tokens below still take precedence over this fallback.
+        if ($SovratisCred) { $refreshToken = $SovratisCred.RefreshToken }
+        # [SOVRATIS OVERRIDE END]
         #Get list of tenants that have 'directTenant' set to true
         #get directtenants directly from table, avoid get-tenants due to performance issues
         $TenantsTable = Get-CippTable -tablename 'Tenants'
@@ -171,9 +195,18 @@ function Get-GraphToken {
             }
         }
 
+        # [SOVRATIS OVERRIDE START]
+        if ($SovratisCred) {
+            $AuthBody['client_id'] = $SovratisCred.ApplicationId
+            if ($AuthBody.ContainsKey('client_secret')) { $AuthBody['client_secret'] = $SovratisCred.ApplicationSecret }
+        }
+        # [SOVRATIS OVERRIDE END]
         # Rebuild cache key after credential loading (env vars may have been set by Get-CIPPAuthentication)
         if ($UseSharedTokenCache) {
             $CacheClientId = if ($AppID) { [string]$AppID } else { [string]$env:ApplicationID }
+            # [SOVRATIS OVERRIDE START]
+            if ($SovratisCred) { $CacheClientId = [string]$SovratisCred.ApplicationId }
+            # [SOVRATIS OVERRIDE END]
             $GrantType = if ($asApp -eq $true -or ($null -ne $AppID -and $null -ne $AppSecret)) { 'client_credentials' } else { 'refresh_token' }
             if ($UseCertificate -eq $true) { $GrantType = "${GrantType}_certificate" }
             $SharedTokenCacheKey = [CIPP.CIPPTokenCache]::BuildKey([string]$tenantid, [string]$scope, [bool]$asApp, $CacheClientId, $GrantType)
@@ -199,7 +232,10 @@ function Get-GraphToken {
                             $AuthBody.client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
                             $AuthBody.client_assertion = New-CIPPCertificateAssertion -TenantId $tenantid -AppId $AuthBody.client_id -Certificate $SAMCert.Certificate
                         }
-                        $AccessToken = (Invoke-CIPPRestMethod -Method post -Uri "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" -Body $Authbody -ContentType 'application/x-www-form-urlencoded' -ErrorAction Stop)
+                        # [SOVRATIS OVERRIDE START]
+                        # upstream: $AccessToken = (Invoke-CIPPRestMethod -Method post -Uri "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" -Body $Authbody -ContentType 'application/x-www-form-urlencoded' -ErrorAction Stop)
+                        $AccessToken = (Invoke-CIPPRestMethod -Method post -Uri (Resolve-SovratisUri -Uri "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" -CloudEnvironment $SovratisCloud) -Body $Authbody -ContentType 'application/x-www-form-urlencoded' -ErrorAction Stop)
+                        # [SOVRATIS OVERRIDE END]
                     }
                     if ($CertAttempt -gt 1 -and $SAMCert.PfxBase64) {
                         Update-CIPPSAMCertificateEnvCache -Name 'SAMCertificate' -PfxBase64 $SAMCert.PfxBase64

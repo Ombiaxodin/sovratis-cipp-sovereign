@@ -1,40 +1,37 @@
+
 ![Sovratis Light](github_assets/img/sovratis-Light.png#gh-light-mode-only)
 ![Sovratis Dark](github_assets/img/Sovratis.png#gh-dark-mode-only)
-
 
 # Sovratis Sovereign Cloud Manager (Based on CIPP)
 
 ## What is the Sovereign Cloud Manager?
 
-The Sovratis Sovereign Cloud Manager is an enterprise-grade extension of the CyberDrain Improved Partner Portal (CIPP). While the original CIPP is a powerful multi-tenant management portal for standard Microsoft Partners, it assumes full Microsoft 365 feature parity across all environments. 
+The Sovratis Sovereign Cloud Manager is an enterprise-grade modification of the CyberDrain Improved Partner Portal (CIPP). The standard CIPP assumes all tenants operate within the Global Microsoft 365 environment.
 
-This assumption fails in **Sovereign Clouds** (e.g., the German DELOS Cloud) due to strict compliance, data residency boundaries, and limited feature sets. Executing standard API calls in these environments leads to silent failures, UI errors, or severe compliance breaches. 
+This assumption fails in **Sovereign Clouds** (e.g., the German DELOS Cloud) where API endpoints and capabilities differ fundamentally.
 
-To solve this, **Sovratis Consulting** has engineered a sovereign-compliant overlay. It implements a **Gatekeeper Architecture**—a validation middleware that intercepts, evaluates, and filters API requests based on strict tenant-environment capabilities, while maintaining absolute data sovereignty.
+To solve this, **Sovratis Consulting** is extending the CIPP core to natively support multi-cloud routing and strict data sovereignty requirements for enterprise and municipal data centers.
 
-## Core Architectural Pillars & Features
+## Phase 1 Objectives
 
-In addition to standard CIPP capabilities (tenant administration, standards enforcement, and automation), this repository introduces:
+We are currently focusing exclusively on the following two core architectural changes:
 
-- **Validation Middleware & Feature Gating:** An API interceptor layer that evaluates every request against a predefined `CloudEnvironmentType` matrix. Unsupported actions (e.g., specific Copilot or advanced security features not available in Sovereign Clouds) are blocked pre-flight with clean HTTP 403 responses and UI feedback.
-- **Zero Upstream Debt:** The core CIPP repository remains untouched. All sovereign-specific routing and filtering occur within the middleware, allowing seamless upstream merges and patch management from the CIPP community.
-- **Absolute Data Sovereignty (DKE):** Integrated Double Key Encryption (DKE) pattern for all sensitive configuration data and token caches. Utilizes an external, dedicated Hardware Security Module (HSM) or Cloud PKI to ensure the US cloud provider has zero capability to decrypt tenant data.
-- **Native SOC Integration:** Built-in telemetry forwarder. Every blocked API call, authentication attempt, and cryptographic operation is sanitized (masking PII) and forwarded via CEF/JSON to an external Security Operations Center (SOC) for real-time monitoring.
+### 1. Dynamic Sovereign Cloud Routing
 
-## How it works
+- **Tenant Configuration Extension:** The tenant onboarding model is expanded to include a cloud environment selector (`Global` vs. `DELOS`).
+- **Dynamic API Endpoints:** Instead of hardcoded Microsoft Graph and Exchange endpoints, central request wrappers dynamically route API calls to the correct regional endpoints based on the tenant's configured environment.
 
-This repository is a containerized monorepo powered by the Craft runtime, extending the original CIPP structure with a dedicated Sovereign Middleware layer:
+### 2. Double Key Encryption (DKE) & HSM Integration
 
-- **`src/SovereignMiddleware/`** — **[SOVRATIS IP]** The core API Gateway and validation engine intercepting frontend-to-backend communication.
-- **`frontend/`** — The web interface, built with [Next.js](https://nextjs.org/) and React.
-- **`backend/`** — The CIPP API layer, written in PowerShell and executed by the Craft runtime. *(Kept strictly upstream-compatible)*.
-- **`build/`** — Dockerfiles, docker-compose definitions, and tooling used to build and run the containerized deployment, including the proxy routing.
+- **Absolute Data Protection:** Securing all sensitive customer and tenant data stored in Azure.
+- **HSM Integration:** Implementing a Double Key Encryption pattern utilizing an HSM module in Azure. This ensures that sensitive configurations, tokens, and credentials are encrypted at the application level before being committed to any Azure database or storage account.
 
 ## Intellectual Property & Maintainer
 
 Designed and maintained by **Sovratis Consulting** – Specialized in B2B IT Security, Enterprise Cloud Architecture, and Sovereign Data Protection.
 
-For enterprise licensing, SOC integration inquiries, or Sovereign Cloud consulting, visit [sovratis.de](https://sovratis.de).
+For enterprise licensing or Sovereign Cloud consulting, visit [sovratis.de](https://sovratis.de).
 
 ---
+
 *Based on the open-source CIPP project by CyberDrain. For original CIPP documentation, visit [docs.cipp.app](https://docs.cipp.app).*

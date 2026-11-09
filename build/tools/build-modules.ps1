@@ -8,7 +8,10 @@ param(
     [string]$SourceModules = ($env:CRAFT_SOURCE_MODULES ?? 'C:\Github\CIPP-API\Modules'),
     [string]$TargetModules = "$PSScriptRoot\..\..\backend\Modules",
     [string]$OutputDir     = "$PSScriptRoot\..\..\backend\Output",
-    [string[]]$Modules     = @('CIPPCore','CIPPHTTP','CIPPStandards','CIPPDB','CIPPAlerts','CIPPBaselines','CIPPActivityTriggers','CippExtensions','CIPPPwPush')
+    # [SOVRATIS OVERRIDE START]
+    # upstream: [string[]]$Modules     = @('CIPPCore','CIPPHTTP','CIPPStandards','CIPPDB','CIPPAlerts','CIPPBaselines','CIPPActivityTriggers','CippExtensions','CIPPPwPush')
+    [string[]]$Modules     = @('CIPPCore','CIPPHTTP','CIPPStandards','CIPPDB','CIPPAlerts','CIPPBaselines','CIPPActivityTriggers','CippExtensions','CIPPPwPush','SovratisCloud','SovratisCrypto')
+    # [SOVRATIS OVERRIDE END]
 )
 
 # ─────────────────────────────────────────────────────────────

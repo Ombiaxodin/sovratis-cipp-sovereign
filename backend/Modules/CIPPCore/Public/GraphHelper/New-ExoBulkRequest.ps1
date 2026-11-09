@@ -30,6 +30,9 @@ function New-ExoBulkRequest {
         } else {
             $Resource = 'https://outlook.office365.com'
         }
+        # [SOVRATIS OVERRIDE START]
+        $Resource = Resolve-SovratisUri -Uri $Resource -TenantFilter $tenantid
+        # [SOVRATIS OVERRIDE END]
         $Token = Get-GraphToken -Tenantid $tenantid -scope "$Resource/.default" -AsApp:$AsApp.IsPresent
 
         $Tenant = Get-Tenants -IncludeErrors -TenantFilter $tenantid

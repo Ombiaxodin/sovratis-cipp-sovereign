@@ -222,6 +222,9 @@ function Invoke-ExecOffboardTenant {
                 $TenantRow = Get-CIPPAzDataTableEntity @TenantsTable -Filter "PartitionKey eq 'Tenants' and RowKey eq '$TenantId'" -Property RowKey, PartitionKey, customerId, displayName
                 if ($TenantRow) {
                     Remove-CIPPAzDataTableEntity -Force @TenantsTable -Entity $TenantRow
+                    # [SOVRATIS OVERRIDE START]
+                    Remove-SovratisCloudEnvironment -TenantId $TenantRow.customerId
+                    # [SOVRATIS OVERRIDE END]
                     $Results.Add("$($Tenant.displayName) ($TenantId) has been deleted from CIPP")
                     Write-LogMessage -headers $Headers -API $APIName -message "Tenant $($Tenant.displayName) ($TenantId) deleted from CIPP" -Sev 'Info' -tenant $TenantFilter
                 } else {

@@ -28,6 +28,9 @@ function New-GraphBulkRequest {
         }
 
         $URL = "https://graph.microsoft.com/$Version/`$batch"
+        # [SOVRATIS OVERRIDE START]
+        $URL = Resolve-SovratisUri -Uri $URL -TenantFilter $tenantid
+        # [SOVRATIS OVERRIDE END]
         # a $batch lands its sub-requests at once, so the rate limiter can only space whole batches: no batch holds more
         # sub-requests of one measured budget (CIPPRateLimiter) than its burst
         $HasBudgets = $null -ne ('CIPP.CIPPRateLimiter' -as [type])
@@ -110,6 +113,9 @@ function New-GraphBulkRequest {
                 # Re-batch nextLink pagination instead of sequential calls
                 $NextLinkQueue = [System.Collections.Generic.Queue[PSCustomObject]]::new()
                 $InitialNextUrl = $MoreData.body.'@odata.nextLink' -replace 'https://graph.microsoft.com/(v1\.0|beta)', ''
+                # [SOVRATIS OVERRIDE START]
+                $InitialNextUrl = $InitialNextUrl -replace ('https://' + [regex]::Escape((Get-SovratisCloudHost -Service Graph -TenantFilter $tenantid)) + '/(v1\.0|beta)'), ''
+                # [SOVRATIS OVERRIDE END]
                 $NextLinkQueue.Enqueue([PSCustomObject]@{
                         id  = $MoreData.id
                         url = $InitialNextUrl
@@ -172,6 +178,9 @@ function New-GraphBulkRequest {
                         }
                         if ($NextResponse.body.'@odata.nextLink' -and $NoPaginateIds -notcontains $NextResponse.id) {
                             $ContinueUrl = $NextResponse.body.'@odata.nextLink' -replace 'https://graph.microsoft.com/(v1\.0|beta)', ''
+                            # [SOVRATIS OVERRIDE START]
+                            $ContinueUrl = $ContinueUrl -replace ('https://' + [regex]::Escape((Get-SovratisCloudHost -Service Graph -TenantFilter $tenantid)) + '/(v1\.0|beta)'), ''
+                            # [SOVRATIS OVERRIDE END]
                             $NextLinkQueue.Enqueue([PSCustomObject]@{
                                     id  = $NextResponse.id
                                     url = $ContinueUrl

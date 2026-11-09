@@ -20,6 +20,11 @@ function Invoke-ExecRemoveTenant {
         if ($Tenant) {
             try {
                 Remove-CIPPAzDataTableEntity -Force @Table -Entity $Tenant
+                # [SOVRATIS OVERRIDE START]
+                # Removal is the only way to change a tenant's cloud. Drop the immutable row AFTER the tenant row,
+                # so a failure can never leave a live tenant without its cloud setting.
+                Remove-SovratisCloudEnvironment -TenantId $Tenant.customerId
+                # [SOVRATIS OVERRIDE END]
                 $Result = "$($Tenant.displayName) ($($Tenant.customerId)) deleted from CIPP. Note: This does not remove the GDAP relationship, see the Tenant Offboarding wizard to perform that action."
                 Write-LogMessage -headers $Headers -API $APIName -tenant $Tenant.customerId -message $Result -Sev 'Info'
                 $Body = @{Results = $Result }

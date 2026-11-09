@@ -15,6 +15,9 @@ BeforeAll {
         [object]$Headers
     }
 
+    # [SOVRATIS OVERRIDE START]
+    . (Join-Path (Split-Path -Parent $PSCommandPath) '../SovratisCloud/Import-SovratisGlobalStubs.ps1')
+    # [SOVRATIS OVERRIDE END]
     function Get-CippKeyVaultName { 'kv' }
     function Get-CIPPAuthentication { $true }
     function Get-CippKeyVaultSecret { param($VaultName, $Name, [switch]$AsPlainText) }

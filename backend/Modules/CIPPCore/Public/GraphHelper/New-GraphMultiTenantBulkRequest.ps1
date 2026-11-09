@@ -44,6 +44,9 @@ function New-GraphMultiTenantBulkRequest {
             $Body = @{ requests = @($SubRequests[$i..([Math]::Min($i + 19, $SubRequests.Count - 1))]) }
             $Request = [CIPP.CIPPConcurrentRequest]::new()
             $Request.Uri = $Url
+            # [SOVRATIS OVERRIDE START]
+            $Request.Uri = Resolve-SovratisUri -Uri $Url -TenantFilter $Item.TenantFilter
+            # [SOVRATIS OVERRIDE END]
             $Request.Method = 'POST'
             $Request.Body = [CIPP.CippJson]::ToJson($Body, 100) ?? (ConvertTo-Json -InputObject $Body -Compress -Depth 100)
             $Request.ContentType = 'application/json; charset=utf-8'

@@ -28,6 +28,14 @@ function Invoke-ExecAddTenant {
         $ServiceAccount = $Request.body.username ?? ''
         $AuthDate = (Get-Date).ToUniversalTime()
 
+        # [SOVRATIS OVERRIDE START]
+        # Cloud environment selected in the onboarding wizard. Defaults to Global.
+        # Resolving the Graph batch URL here validates the name against the catalog and gives the
+        # pre-flight call below the right host before the tenant has a stored value.
+        $CloudEnvironment = $Request.body.cloudEnvironment ?? 'Global'
+        $GraphBatchUri = Resolve-SovratisUri -Uri 'https://graph.microsoft.com/v1.0/$batch' -CloudEnvironment $CloudEnvironment
+        # [SOVRATIS OVERRIDE END]
+
         # Get the Tenants table
         $TenantsTable = Get-CippTable -tablename 'Tenants'
         #force a refresh of the authentication info
@@ -50,6 +58,15 @@ function Invoke-ExecAddTenant {
             $Results = @{'message' = "$($ExistingTenant.displayName) is already onboarded as a GDAP tenant and cannot be converted to a Direct Tenant. To manage it as a Direct Tenant, remove the tenant first under Settings > Tenants, then add it again using the Direct Tenant flow."; 'severity' = 'error' }
             $StatusCode = [HttpStatusCode]::BadRequest
             Write-LogMessage -tenant $ExistingTenant.defaultDomainName -tenantid $ExistingTenant.customerId -API 'NewTenant' -message "Blocked conversion of GDAP tenant $($ExistingTenant.displayName) to a Direct Tenant, attempted by $ServiceAccount." -Sev 'Warning'
+        # [SOVRATIS OVERRIDE START]
+        } elseif ($ExistingTenant -and $CloudEnvironment -ne (Get-SovratisCloudEnvironment -TenantFilter $tenantId -SkipCache)) {
+            # The sign-in used the selected cloud's authority. Storing credentials for a tenant whose
+            # configured cloud differs would break it silently, so refuse. The cloud is immutable:
+            # remove the tenant and onboard it again to move it.
+            Remove-CIPPDirectTenantToken -TenantId $tenantId
+            $Results = @{'message' = "$($ExistingTenant.displayName) is configured for a different cloud environment, which cannot be changed. Remove the tenant and onboard it again."; 'severity' = 'error' }
+            $StatusCode = [HttpStatusCode]::BadRequest
+        # [SOVRATIS OVERRIDE END]
         } elseif ($ExistingTenant) {
             # Existing direct tenant - refresh the stored credentials and service account details.
             $ExistingTenant | Add-Member -NotePropertyName 'directTenantUserPrincipalName' -NotePropertyValue $ServiceAccount -Force
@@ -81,7 +98,10 @@ function Invoke-ExecAddTenant {
                     requests = $BulkRequests
                 } | ConvertTo-Json -Depth 10
 
-                $BulkResponse = Invoke-RestMethod -Uri 'https://graph.microsoft.com/v1.0/$batch' -Headers $headers -Method POST -Body $BulkBody -ContentType 'application/json' -ErrorAction Stop
+                # [SOVRATIS OVERRIDE START]
+                # upstream: $BulkResponse = Invoke-RestMethod -Uri 'https://graph.microsoft.com/v1.0/$batch' -Headers $headers -Method POST -Body $BulkBody -ContentType 'application/json' -ErrorAction Stop
+                $BulkResponse = Invoke-RestMethod -Uri $GraphBatchUri -Headers $headers -Method POST -Body $BulkBody -ContentType 'application/json' -ErrorAction Stop
+                # [SOVRATIS OVERRIDE END]
 
                 # Parse bulk response
                 $OrgResponse = ($BulkResponse.responses | Where-Object { $_.id -eq 'organization' }).body.value
@@ -117,6 +137,19 @@ function Invoke-ExecAddTenant {
 
             # Add tenant to table
             Add-CIPPAzDataTableEntity @TenantsTable -Entity $NewTenant -Force | Out-Null
+
+            # [SOVRATIS OVERRIDE START]
+            # Persist the cloud environment in TenantProperties. If that fails, roll the
+            # tenant back. A DELOS tenant must never end up stored without its cloud and quietly
+            # routed to the Global endpoints.
+            try {
+                $null = Set-SovratisCloudEnvironment -TenantFilter $tenantId -CloudEnvironment $CloudEnvironment -Headers $Request.Headers
+            } catch {
+                Remove-CIPPAzDataTableEntity @TenantsTable -Entity $NewTenant -Force | Out-Null
+                Remove-CIPPDirectTenantToken -TenantId $tenantId
+                throw "Could not set cloud environment '$CloudEnvironment': $($_.Exception.Message)"
+            }
+            # [SOVRATIS OVERRIDE END]
             $Results = @{'message' = "Successfully added tenant $displayName ($defaultDomainName) to the tenant list with Direct Tenant status. Permission refresh queued, the tenant will be available shortly."; 'severity' = 'success' }
             Write-LogMessage -tenant $defaultDomainName -tenantid $tenantId -API 'NewTenant' -message "Added tenant $displayName ($defaultDomainName) with Direct Tenant status." -Sev 'Info'
 

@@ -107,6 +107,9 @@ function New-TeamsRequestV2 {
     if (-not (Get-AuthorisedRequest -TenantID $TenantFilter)) {
         throw (Get-AuthorisedRequestError -TenantID $TenantFilter -Context 'Teams request')
     }
+    # [SOVRATIS OVERRIDE START]
+    Assert-SovratisServiceSupported -Service Teams -TenantFilter $TenantFilter
+    # [SOVRATIS OVERRIDE END]
 
     # ---- cmdlet-noun -> ConfigAPI type aliases (noun != type) ----
     $TypeAliases = @{

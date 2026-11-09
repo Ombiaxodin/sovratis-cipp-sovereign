@@ -26,6 +26,13 @@ Function Invoke-ExecExcludeTenant {
         $body = @($ExcludedTenants)
     } elseif ($Request.Query.ListAll) {
         $ExcludedTenants = Get-CIPPAzDataTableEntity @TenantsTable -Filter "PartitionKey eq 'Tenants'" | Sort-Object -Property displayName
+        # [SOVRATIS OVERRIDE START]
+        # CloudEnvironment lives in TenantProperties, so add it to every row for the tenant tables. Default is Global.
+        $SovratisCloudMap = Get-SovratisCloudEnvironmentMap
+        foreach ($SovratisRow in $ExcludedTenants) {
+            $SovratisRow | Add-Member -NotePropertyName 'CloudEnvironment' -NotePropertyValue ($SovratisCloudMap[[string]$SovratisRow.customerId] ?? 'Global') -Force
+        }
+        # [SOVRATIS OVERRIDE END]
         Write-LogMessage -API $APIName -headers $Headers -message 'got excluded tenants list' -Sev 'Debug'
         $body = @($ExcludedTenants)
     }

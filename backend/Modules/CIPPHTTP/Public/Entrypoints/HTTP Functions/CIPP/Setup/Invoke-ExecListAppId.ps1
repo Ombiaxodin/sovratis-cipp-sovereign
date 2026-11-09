@@ -121,6 +121,11 @@ function Invoke-ExecListAppId {
         partnerTenantType              = $OrgInfo.partnerTenantType
         refreshUrl                     = "https://login.microsoftonline.com/$env:TenantID/oauth2/v2.0/authorize?client_id=$env:ApplicationID&response_type=code&redirect_uri=$ResponseURL&response_mode=query&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default+offline_access+profile+openid&state=1&prompt=select_account"
     }
+    # [SOVRATIS OVERRIDE START]
+    # Public details of every cloud environment (authority, Graph host, app id, configured) for the onboarding UI.
+    $Results['cloudEnvironments'] = @(Get-SovratisCloudEnvironmentList)
+    # [SOVRATIS OVERRIDE END]
+
     return [HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body       = $Results

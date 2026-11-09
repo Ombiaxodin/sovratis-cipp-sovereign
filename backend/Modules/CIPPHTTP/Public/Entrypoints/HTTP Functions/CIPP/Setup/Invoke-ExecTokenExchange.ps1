@@ -34,6 +34,21 @@ function Invoke-ExecTokenExchange {
             })
     }
 
+    # [SOVRATIS OVERRIDE START]
+    # The pinned token endpoint depends on the cloud environment. It is derived from the server-side catalog,
+    # never taken from the caller: a request can only pick a cloud by name, not supply an endpoint.
+    $SovratisCloud = [string]($Request.Body.cloudEnvironment ?? 'Global')
+    try {
+        $ExpectedTokenUri = [System.Uri](Resolve-SovratisUri -Uri 'https://login.microsoftonline.com/organizations/oauth2/v2.0/token' -CloudEnvironment $SovratisCloud)
+    } catch {
+        return ([HttpResponseContext]@{
+                StatusCode = [HttpStatusCode]::BadRequest
+                Body       = @{ error = 'invalid_request'; error_description = "Invalid cloudEnvironment '$SovratisCloud'." }
+                Headers    = @{'Content-Type' = 'application/json' }
+            })
+    }
+    # [SOVRATIS OVERRIDE END]
+
     # This endpoint exists only for the SAM setup wizard's authorization-code exchange, which always
     # posts to the /organizations token endpoint. Pin the full URL so a caller cannot redirect the
     # SAM credential to an arbitrary tenant realm.
@@ -41,7 +56,10 @@ function Invoke-ExecTokenExchange {
     $IsValidTokenUri = [System.Uri]::TryCreate($TokenUrl, [System.UriKind]::Absolute, [ref]$ParsedTokenUri)
     if (-not $IsValidTokenUri -or
         -not $ParsedTokenUri.Scheme.Equals('https', [System.StringComparison]::OrdinalIgnoreCase) -or
-        -not $ParsedTokenUri.Host.Equals('login.microsoftonline.com', [System.StringComparison]::OrdinalIgnoreCase) -or
+        # [SOVRATIS OVERRIDE START]
+        # upstream: -not $ParsedTokenUri.Host.Equals('login.microsoftonline.com', [System.StringComparison]::OrdinalIgnoreCase) -or
+        -not $ParsedTokenUri.Host.Equals($ExpectedTokenUri.Host, [System.StringComparison]::OrdinalIgnoreCase) -or
+        # [SOVRATIS OVERRIDE END]
         -not $ParsedTokenUri.AbsolutePath.Equals('/organizations/oauth2/v2.0/token', [System.StringComparison]::OrdinalIgnoreCase)) {
         Write-LogMessage -API $APIName -message "Blocked token request to disallowed token endpoint: $TokenUrl" -Sev 'Warning'
         return ([HttpResponseContext]@{
@@ -85,6 +103,14 @@ function Invoke-ExecTokenExchange {
         if ($env:ApplicationID -and $env:ApplicationID -notmatch '^LongApplicationId$') {
             $FormData['client_id'] = $env:ApplicationID
         }
+        # [SOVRATIS OVERRIDE START]
+        # Sovereign cloud: the exchange runs as that cloud's own app (it throws if no credentials are configured).
+        $SovratisCred = $null
+        if ($SovratisCloud -ne 'Global') {
+            $SovratisCred = Get-SovratisCloudCredential -CloudEnvironment $SovratisCloud
+            $FormData['client_id'] = $SovratisCred.ApplicationId
+        }
+        # [SOVRATIS OVERRIDE END]
 
         # Resolve the client secret, tolerating its absence. A secret-less certificate-only setup
         # never has one, and certificate mode does not use it even when it exists.
@@ -107,6 +133,10 @@ function Invoke-ExecTokenExchange {
         # Use a signed certificate assertion instead of the client secret when certificate mode is
         # on, or when there is no usable secret at all (a secret-less setup - the only way to auth).
         $UseCertAssertion = [bool]$env:CertificateAuthMode -or -not $SecretUsable
+        # [SOVRATIS OVERRIDE START]
+        # The SAM certificate belongs to the Global app; the sovereign app always authenticates with its secret.
+        if ($SovratisCred) { $ClientSecret = $SovratisCred.ApplicationSecret; $SecretUsable = $true; $UseCertAssertion = $false }
+        # [SOVRATIS OVERRIDE END]
 
         if ($UseCertAssertion) {
             $AppId = $FormData['client_id']

@@ -6,6 +6,9 @@
 # only "Response status code does not indicate success: 500".
 
 BeforeAll {
+    # [SOVRATIS OVERRIDE START]
+    . (Join-Path (Split-Path -Parent $PSCommandPath) '../SovratisCloud/Import-SovratisGlobalStubs.ps1')
+    # [SOVRATIS OVERRIDE END]
     $RepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
     $FunctionPath = Join-Path $RepoRoot 'Modules/CIPPCore/Public/GraphHelper/New-ExoRequest.ps1'
 

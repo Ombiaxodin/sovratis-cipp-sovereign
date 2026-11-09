@@ -49,6 +49,9 @@ function Get-GraphTokenFromCert {
     }
 
     $Url = "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token"
+    # [SOVRATIS OVERRIDE START]
+    $Url = Resolve-SovratisUri -Uri $Url -TenantFilter $TenantId
+    # [SOVRATIS OVERRIDE END]
 
     # Use the self-generated JWT as Authorization
     $Header = @{

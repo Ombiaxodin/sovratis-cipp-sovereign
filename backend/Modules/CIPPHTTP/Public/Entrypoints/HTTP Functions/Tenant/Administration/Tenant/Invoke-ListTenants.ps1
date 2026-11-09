@@ -151,6 +151,16 @@ function Invoke-ListTenants {
             }
         }
 
+        # [SOVRATIS OVERRIDE START]
+        # Opt-in (one extra TenantProperties query): the Administration > Tenants table shows the cloud environment.
+        if ($Request.Query.IncludeCloudEnvironment -eq 'true' -and $Tenants) {
+            $SovratisCloudMap = Get-SovratisCloudEnvironmentMap
+            foreach ($SovratisTenant in @($Tenants)) {
+                $SovratisTenant | Add-Member -MemberType NoteProperty -Name 'CloudEnvironment' -Value ($SovratisCloudMap[[string]$SovratisTenant.customerId] ?? 'Global') -Force
+            }
+        }
+        # [SOVRATIS OVERRIDE END]
+
         if (($null -eq $TenantFilter -or $TenantFilter -eq 'null') -or $Request.Query.Mode -eq 'TenantList') {
             $TenantList = [system.collections.generic.list[object]]::new()
             if ($AllTenantSelector -eq $true) {

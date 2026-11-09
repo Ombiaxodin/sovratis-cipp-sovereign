@@ -43,6 +43,9 @@ function New-ExoRequest {
         } else {
             $Resource = 'https://outlook.office365.com'
         }
+        # [SOVRATIS OVERRIDE START]
+        $Resource = Resolve-SovratisUri -Uri $Resource -TenantFilter $tenantid
+        # [SOVRATIS OVERRIDE END]
         # -UseCertificate authenticates the app with the SAM certificate instead of the
         # client secret: delegated (refresh token) by default, app-only with -AsApp
         $token = Get-GraphToken -Tenantid $tenantid -scope "$Resource/.default" -AsApp:$AsApp.IsPresent -UseCertificate:$UseCertificate
@@ -107,6 +110,10 @@ function New-ExoRequest {
                 $RedirectedHost = ([System.Uri]($ComplianceHeaders.Location | Select-Object -First 1)).Host
                 $RedirectedHostname = '{0}.ps.compliance.protection.outlook.com' -f ($RedirectedHost -split '\.' | Select-Object -First 1)
                 $Resource = "https://$($RedirectedHostname)"
+                # [SOVRATIS OVERRIDE START]
+                # the redirect host is rebuilt with the Global suffix; map it to the tenant's cloud
+                $Resource = Resolve-SovratisUri -Uri $Resource -TenantFilter $tenantid
+                # [SOVRATIS OVERRIDE END]
                 try {
                     $null = [System.Uri]$Resource
                     $Tenant | Add-Member -MemberType NoteProperty -Name ComplianceUrl -Value $Resource

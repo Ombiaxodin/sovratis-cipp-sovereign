@@ -59,6 +59,16 @@ FROM ps-base AS build-cipppwpush
 COPY backend/Modules/CIPPPwPush /src/CIPPPwPush
 RUN pwsh -File /build/build-single-module.ps1 -Module CIPPPwPush
 
+# [SOVRATIS OVERRIDE START]
+FROM ps-base AS build-sovratiscloud
+COPY backend/Modules/SovratisCloud /src/SovratisCloud
+RUN pwsh -File /build/build-single-module.ps1 -Module SovratisCloud
+
+FROM ps-base AS build-sovratiscrypto
+COPY backend/Modules/SovratisCrypto /src/SovratisCrypto
+RUN pwsh -File /build/build-single-module.ps1 -Module SovratisCrypto
+# [SOVRATIS OVERRIDE END]
+
 FROM ps-base AS build-cipptests
 COPY backend/Modules/CIPPTests /src/CIPPTests
 RUN pwsh -File /build/build-single-module.ps1 -Module CIPPTests -KeepPublic
@@ -223,6 +233,10 @@ COPY docs                           /app/API/Docs/
 
 # Compiled modules — ordered by change frequency (least → most)
 COPY --from=build-cipppwpush           /src/CIPPPwPush/           /app/API/Modules/CIPPPwPush/
+# [SOVRATIS OVERRIDE START]
+COPY --from=build-sovratiscloud        /src/SovratisCloud/        /app/API/Modules/SovratisCloud/
+COPY --from=build-sovratiscrypto       /src/SovratisCrypto/       /app/API/Modules/SovratisCrypto/
+# [SOVRATIS OVERRIDE END]
 COPY --from=build-cippextensions       /src/CippExtensions/       /app/API/Modules/CippExtensions/
 COPY --from=build-cippactivitytriggers /src/CIPPActivityTriggers/ /app/API/Modules/CIPPActivityTriggers/
 COPY --from=build-cippdb               /src/CIPPDB/               /app/API/Modules/CIPPDB/

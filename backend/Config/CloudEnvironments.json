@@ -1,0 +1,20 @@
+{
+  "Global": {
+    "Authority": "login.microsoftonline.com",
+    "Graph": "graph.microsoft.com",
+    "Exchange": "outlook.office365.com",
+    "Compliance": "ps.compliance.protection.outlook.com",
+    "Arm": "management.azure.com",
+    "KeyVault": "vault.azure.net",
+    "Admin": "admin.microsoft.com",
+    "Teams": "teams.microsoft.com"
+  },
+  "DELOS": {
+    "Authority": "login.microsoftonline.delos.cloud",
+    "Graph": "graph.microsoft.delos.cloud",
+    "Exchange": "outlook.office365.delos.cloud",
+    "Compliance": "ps.compliance.protection.delos.cloud",
+    "Arm": "management.delos.cloud",
+    "KeyVault": "vault.delos.cloud"
+  }
+}

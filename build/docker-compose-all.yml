@@ -71,9 +71,13 @@ services:
     # DevExpandModules__N and the mount list in cipp-api.
     image: busybox:latest
     container_name: cipp-manifests
+    # [SOVRATIS OVERRIDE START]
+    # SovratisCloud and SovratisCrypto are added to the module list in the command below. It stays inline on purpose: a comment
+    # inside this folded scalar would be joined into the shell command and swallow the rest of it.
+    # [SOVRATIS OVERRIDE END]
     command: >
       sh -c 'set -e; mkdir -p /out;
-      for m in CIPPStandards CIPPAlerts CIPPBaselines CIPPTests CIPPDB CippExtensions CIPPPwPush CIPPActivityTriggers; do
+      for m in CIPPStandards CIPPAlerts CIPPBaselines CIPPTests CIPPDB CippExtensions CIPPPwPush SovratisCloud SovratisCrypto CIPPActivityTriggers; do
       cp -f "/src/$$m/$$m.psd1" "/out/$$m.psd1"; done'
     volumes:
       - ../backend/Modules:/src:ro
@@ -130,6 +134,10 @@ services:
       - App__Worker__DevExpandModules__5=CIPPActivityTriggers
       - App__Worker__DevExpandModules__6=CIPPBaselines
       - App__Worker__DevExpandModules__7=CIPPPwPush
+      # [SOVRATIS OVERRIDE START]
+      - App__Worker__DevExpandModules__8=SovratisCloud
+      - App__Worker__DevExpandModules__9=SovratisCrypto
+      # [SOVRATIS OVERRIDE END]
       # The Next.js dev server runs in a container, if using windows bind mounts are too slow for node_modules
       # you should use the other docker compose file without the frontend container and run the frontend dev server on the host using the start script
       - CRAFT_DEV_FRONTEND_URL=http://cipp-frontend:3000
@@ -170,6 +178,10 @@ services:
       - ./.devmanifests/CIPPDB.psd1:/app/API/Modules/CIPPDB/CIPPDB.psd1
       - ./.devmanifests/CippExtensions.psd1:/app/API/Modules/CippExtensions/CippExtensions.psd1
       - ./.devmanifests/CIPPPwPush.psd1:/app/API/Modules/CIPPPwPush/CIPPPwPush.psd1
+      # [SOVRATIS OVERRIDE START]
+      - ./.devmanifests/SovratisCloud.psd1:/app/API/Modules/SovratisCloud/SovratisCloud.psd1
+      - ./.devmanifests/SovratisCrypto.psd1:/app/API/Modules/SovratisCrypto/SovratisCrypto.psd1
+      # [SOVRATIS OVERRIDE END]
       - ./.devmanifests/CIPPActivityTriggers.psd1:/app/API/Modules/CIPPActivityTriggers/CIPPActivityTriggers.psd1
     develop:
       watch:

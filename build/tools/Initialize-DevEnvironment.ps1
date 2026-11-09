@@ -84,6 +84,10 @@ switch ($LoadedModules) {
     'CIPPCore' { Remove-Module CIPPCore -Force }
     'CippExtensions' { Remove-Module CippExtensions -Force }
     'CIPPPwPush' { Remove-Module CIPPPwPush -Force }
+    # [SOVRATIS OVERRIDE START]
+    'SovratisCloud' { Remove-Module SovratisCloud -Force }
+    'SovratisCrypto' { Remove-Module SovratisCrypto -Force }
+    # [SOVRATIS OVERRIDE END]
 }
 
 Import-Module ( Join-Path $CippRoot 'Modules\AzBobbyTables' )
@@ -91,6 +95,10 @@ Import-Module ( Join-Path $CippRoot 'Modules\DNSHealth' )
 Import-Module ( Join-Path $CippRoot 'Modules\CIPPCore' )
 Import-Module ( Join-Path $CippRoot 'Modules\CippExtensions' )
 Import-Module ( Join-Path $CippRoot 'Modules\CIPPPwPush' )
+# [SOVRATIS OVERRIDE START]
+Import-Module ( Join-Path $CippRoot 'Modules\SovratisCloud' )
+Import-Module ( Join-Path $CippRoot 'Modules\SovratisCrypto' )
+# [SOVRATIS OVERRIDE END]
 
 $Auth = Get-CIPPAuthentication
 if ($Auth) {

@@ -2,6 +2,9 @@
 # matches recognise. It is retryable, so the status code itself has to trigger the retry.
 
 BeforeAll {
+    # [SOVRATIS OVERRIDE START]
+    . (Join-Path (Split-Path -Parent $PSCommandPath) '../SovratisCloud/Import-SovratisGlobalStubs.ps1')
+    # [SOVRATIS OVERRIDE END]
     $RepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
     Add-Type -Path (Join-Path $RepoRoot 'Shared/CIPPSharp/bin/CIPPSharp.dll')
 

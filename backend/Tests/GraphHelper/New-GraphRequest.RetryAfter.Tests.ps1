@@ -4,6 +4,9 @@
 # Retry-After may also be an HTTP date rather than seconds, which must fall back to the default wait.
 
 BeforeAll {
+    # [SOVRATIS OVERRIDE START]
+    . (Join-Path (Split-Path -Parent $PSCommandPath) '../SovratisCloud/Import-SovratisGlobalStubs.ps1')
+    # [SOVRATIS OVERRIDE END]
     $RepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
     Add-Type -Path (Join-Path $RepoRoot 'Shared/CIPPSharp/bin/CIPPSharp.dll')
 

@@ -113,6 +113,10 @@ services:
       - ./.devmodules/CIPPActivityTriggers:/app/API/Modules/CIPPActivityTriggers:ro
       - ./.devmodules/CippExtensions:/app/API/Modules/CippExtensions:ro
       - ./.devmodules/CIPPPwPush:/app/API/Modules/CIPPPwPush:ro
+      # [SOVRATIS OVERRIDE START]
+      - ./.devmodules/SovratisCloud:/app/API/Modules/SovratisCloud:ro
+      - ./.devmodules/SovratisCrypto:/app/API/Modules/SovratisCrypto:ro
+      # [SOVRATIS OVERRIDE END]
       - ./.devmodules/CIPPTests:/app/API/Modules/CIPPTests:rw
     develop:
       watch:
@@ -134,6 +138,10 @@ services:
             - CIPPActivityTriggers/
             - CippExtensions/
             - CIPPPwPush/
+            # [SOVRATIS OVERRIDE START]
+            - SovratisCloud/
+            - SovratisCrypto/
+            # [SOVRATIS OVERRIDE END]
         - action: restart
           path: ../backend/Shared
           target: /app/API/Shared

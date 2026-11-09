@@ -4,6 +4,9 @@
 # the assertion audience to be the v1 token endpoint, not the default v2 one - pinned here.
 
 BeforeAll {
+    # [SOVRATIS OVERRIDE START]
+    . (Join-Path (Split-Path -Parent $PSCommandPath) '../SovratisCloud/Import-SovratisGlobalStubs.ps1')
+    # [SOVRATIS OVERRIDE END]
     $RepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
 
     function Get-CIPPSAMCertificate { param([switch]$SkipCache) }
