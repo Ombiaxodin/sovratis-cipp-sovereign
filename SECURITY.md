@@ -1,19 +1,32 @@
 # Security Policy
 
+Sovratis Sovereign Cloud Manager is maintained by Sovratis Consulting. We treat the security of this software, and of the sovereign and enterprise environments it manages, as a core requirement.
+
 ## Supported Versions
 
-The current [release](https://github.com/CyberDrain/CIPP/releases) is the only "supported version" and should not have any security bugs. However if you find a security issue in an older release feel free to also report this in case of regression, We'd rather know we made a mistake at one point in time and avoid that in the future.
+Only the current release of Sovratis Sovereign Cloud Manager is supported and receives security fixes. If you find a vulnerability in an older release, please still report it so that we can assess whether it is a regression and whether the current release is affected.
 
 ## Reporting a Vulnerability
 
-Reporting a vulnerability is best done by emailing [security@cyberdrain.com](mailto:security@cyberdrain.com?subject=CIPP%20Security%20Issue) but you can also message an admin directly on the CyberDrain Discord. All relevant contributors will be alerted and can discuss the issue in private and address it if appropriate. It will help in making the fix available as soon as possible without endangering other users of the product.
+Please report security vulnerabilities by email to **[security@sovratis.de](mailto:security@sovratis.de?subject=Sovereign%20Cloud%20Manager%20Security%20Issue)**.
 
-We will publicly release any security report after the resolution, including all communications. If you would rather have only the bug report public, please let us know in the report.
+Please do not open public issues or pull requests for security vulnerabilities, and do not disclose them publicly before they have been addressed.
 
-## Notifications and security advisories
+To help us triage quickly, include where possible:
 
-We report any security notification via the GitHub notification and advisory system. Subscribers that are hosted will also receive a notification in case a major bug has been found.
+* a description of the vulnerability and its potential impact,
+* the affected component, version or commit,
+* steps to reproduce, or a proof of concept,
+* any suggested mitigation.
 
-## Bounties and Rewards
+Do not include real customer data, credentials or tokens in a report. If you accidentally obtained such data while testing, tell us and delete it.
 
-This project is a subscription-funded open-source effort, which makes it hard to create a monetary reward without breaking the bank very quickly. for *critical* level bugs, that cause RCE/API data leaks/etc I will award a 50 dollar reward. For other bugs, I potentially am able to reward with some swag such as an official CyberDrain T-shirt or hoodie :)
+We will acknowledge receipt, assess the report, and keep you informed of progress through to resolution. Reports are handled confidentially and shared only with the people who need them to investigate and fix the issue.
+
+## Coordinated Disclosure
+
+We follow a coordinated disclosure approach: we ask reporters to give us a reasonable opportunity to fix a vulnerability and make the fix available before any public disclosure. After a fix is released, we may publish a security advisory describing the issue and the remediation. If you wish to be credited, or prefer to remain anonymous, please say so in your report.
+
+## Notifications and Security Advisories
+
+Security fixes are published as releases of this repository together with, where appropriate, a GitHub security advisory. We recommend watching the repository for releases so that you are notified when a security update is available.

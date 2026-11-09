@@ -1,3 +1,5 @@
+MODIFIED WORK NOTICE: This project, 'Sovratis Sovereign Cloud Manager', is a modified version of the CyberDrain Improved Partner Portal (CIPP). Modifications are Copyright (C) 2026 Sovratis Consulting.
+
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
