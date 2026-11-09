@@ -81,6 +81,12 @@ function Add-CIPPAzDataTableEntity {
         return
     }
 
+    # [SOVRATIS OVERRIDE START]
+    # Application-layer encryption for the tables named in Config/EncryptionPolicy.json. Runs before the
+    # large-entity split, works on copies, and is a pass-through for every other table.
+    $Entities = [System.Collections.Generic.List[object]]::new(@($Entities.ToArray() | Protect-SovratisEntity -Table ([string]$Context.TableName)))
+    # [SOVRATIS OVERRIDE END]
+
     $Parameters = @{
         Context                = $Context
         Entity                 = $Entities.ToArray()

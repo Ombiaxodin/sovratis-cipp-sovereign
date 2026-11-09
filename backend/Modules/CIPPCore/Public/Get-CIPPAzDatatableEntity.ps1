@@ -41,10 +41,21 @@ function Get-CIPPAzDataTableEntity {
     $null = $Parameters.Remove('Stream')
 
     # TableNotFound fails the first page, so a streamed read has emitted nothing when it is retried.
+    # [SOVRATIS OVERRIDE START]
+    # Decrypt the properties named in Config/EncryptionPolicy.json on the reassembled rows. Pass-through for
+    # every other table and for non-entity output such as -Count.
+    $SovratisTable = [string]$Context.TableName
+    # upstream: Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors
+    # upstream: $Results = Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors
+    # [SOVRATIS OVERRIDE END]
     if ($Stream) {
-        Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors
+        # [SOVRATIS OVERRIDE START]
+        Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors | Unprotect-SovratisEntity -Table $SovratisTable
+        # [SOVRATIS OVERRIDE END]
     } else {
-        $Results = Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors
+        # [SOVRATIS OVERRIDE START]
+        $Results = Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors | Unprotect-SovratisEntity -Table $SovratisTable
+        # [SOVRATIS OVERRIDE END]
     }
 
     # Do not pipe $null/$empty into Where-Object - PowerShell invokes the block once with $_ = $null.
@@ -60,9 +71,13 @@ function Get-CIPPAzDataTableEntity {
             Repair-CIPPTable -Context $Context
             $TableErrors = $null
             if ($Stream) {
-                Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors
+                # [SOVRATIS OVERRIDE START]
+                Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors | Unprotect-SovratisEntity -Table $SovratisTable
+                # [SOVRATIS OVERRIDE END]
             } else {
-                $Results = Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors
+                # [SOVRATIS OVERRIDE START]
+                $Results = Get-AzDataTableLargeEntity @Parameters -ErrorAction SilentlyContinue -ErrorVariable TableErrors | Unprotect-SovratisEntity -Table $SovratisTable
+                # [SOVRATIS OVERRIDE END]
             }
         } finally {
             $script:CIPPRepairingTable = $false

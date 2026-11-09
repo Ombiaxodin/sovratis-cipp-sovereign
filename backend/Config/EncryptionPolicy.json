@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "tables": {
+    "CippReportingDB": {
+      "purpose": "ReportingData",
+      "tenantFrom": "PartitionKey",
+      "properties": [ "Data" ]
+    },
+    "ApiClients": {
+      "purpose": "ApiClient",
+      "tenant": "platform",
+      "properties": [ "Role", "IPRange" ]
+    }
+  }
+}
